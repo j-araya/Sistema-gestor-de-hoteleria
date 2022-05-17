@@ -20,22 +20,24 @@ def index(request):
 
 def iniciar_sesion(request):
 
+    if request.user.is_authenticated:
+        return redirect('/')
+     
     if request.method == 'POST':
-        form = AuthenticationForm(request=request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                print(user)
-                login(request, user)
-                return HttpResponseRedirect('/')
-            else:
-                print('User not found')
-
-    form = AuthenticationForm()
-
-    return render(request, 'iniciar-sesion.html', {'form':form})
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username =username, password = password)
+ 
+        if user is not None:
+            login(request,user)
+            return redirect('/')
+        else:
+            form = AuthenticationForm()
+            return render(request,'iniciar-sesion.html',{'form':form})
+     
+    else:
+        form = AuthenticationForm()
+        return render(request, 'iniciar-sesion.html', {'form':form})
 
 def registro(request):
 
@@ -44,29 +46,24 @@ def registro(request):
         form_usuario = UserCreationForm(request.POST)
         if form_cliente.is_valid() and form_usuario.is_valid():
             username = form_usuario.cleaned_data['username']
-            password1 = form_usuario.cleaned_data['password1']
-            usuario = User(username=username, password=password1)
+            password = form_usuario.cleaned_data['password1']
 
-            nombre = form_cliente.cleaned_data['nombre']
-            apellido = form_cliente.cleaned_data['apellido']
-            tipo_documento = form_cliente.cleaned_data['tipo_documento']
-            documento = form_cliente.cleaned_data['documento']
-            telefono = form_cliente.cleaned_data['telefono']
-            direccion = form_cliente.cleaned_data['direccion']
-
+            usuario = User.objects.create_user(username=username, password=password)
             usuario.save()
-            cliente = Cliente(
-                usuario=usuario,
-                nombre=nombre,
-                apellido=apellido,
-                tipo_documento=tipo_documento,
-                documento=documento,
-                telefono=telefono,
-                direccion=direccion,
-            )
 
+            cliente = Cliente(
+                usuario= usuario,
+                nombre = form_cliente.cleaned_data['nombre'],
+                apellido = form_cliente.cleaned_data['apellido'],
+                tipo_documento = form_cliente.cleaned_data['tipo_documento'],
+                documento = form_cliente.cleaned_data['documento'],
+                telefono = form_cliente.cleaned_data['telefono'],
+                direccion = form_cliente.cleaned_data['direccion'],
+            )
             cliente.save()
+
             messages.success(request, 'Se ha registrado exitosamete')
+            login(request, usuario)
             return redirect('/')
             
         else:
