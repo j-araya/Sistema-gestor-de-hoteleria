@@ -1,0 +1,29 @@
+{% extends 'Esquema.html' %}
+
+{% block title %}
+    Habitaciones
+{% endblock %}
+
+{% block content %}
+
+    {% if habitaciones %}
+        <ul>
+            {% for habitacion in habitaciones %}
+                <li>
+                    {{habitacion}}
+                    <a href="{% url 'habitacion' habitacion.codigo %}" class="btn btn-primary">Ver habitacion</a>
+
+                </li>
+                <hr>
+            {% endfor %}
+        </ul>
+        
+    {% else %}
+
+        <p>No hay habitaciones</p>
+        
+    {% endif %}
+    
+
+
+{% endblock %}

@@ -1,22 +1,27 @@
-from email import message
-import re
-from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+import reservaciones
 
-from reservaciones.models import Cliente
+from reservaciones.models import Cliente, Habitacion, Reservacion
 from reservaciones.forms import *
-
+from reservaciones import utilities
 
 # Create your views here.
 
 def index(request):
-    
-    return render(request, 'index.html', {})
+
+    form = PeriodoForm()
+
+    if request.user.is_authenticated:
+        cliente = Cliente.objects.get(usuario = request.user)
+        reservaciones = Reservacion.objects.filter(cliente=cliente)
+        return render(request, 'index.html', {'form': form, 'reservaciones':reservaciones})
+        
+    return render(request, 'index.html', {'form': form})
 
 def iniciar_sesion(request):
 
@@ -76,8 +81,65 @@ def registro(request):
     form_usuario = UserCreationForm()
 
     return render(request, 'registro.html', {'form_cliente': form_cliente, 'form_usuario':form_usuario})
-    
-login_required('/', 'iniciar-sesion')
+
 def cerrar_sesion(request):
     logout(request)
     return redirect('/')
+
+def habitaciones(request):
+
+    if request.method == 'POST':
+
+        form = PeriodoForm(request.POST)
+        if form.is_valid():
+            
+            fecha_entrada = form.cleaned_data['fecha_entrada']
+            fecha_salida = form.cleaned_data['fecha_salida']
+
+            habitaciones = Habitacion.objects.all()
+            
+            disponibles = utilities.habitaciones_disponibles(habitaciones, fecha_entrada, fecha_salida)
+
+            return render(request, 'listar-habitaciones.html', {'habitaciones':disponibles})
+
+    habitaciones = Habitacion.objects.all()
+
+    return render(request, 'listar-habitaciones.html', {'habitaciones':habitaciones})
+    
+def habitacion(request, codigo):
+
+    habitacion = Habitacion.objects.filter(codigo=codigo).first()
+
+    return render(request, 'habitacion.html', {'habitacion': habitacion})
+
+def reservar(request, codigo_habitacion):
+
+    if request.method == 'POST':
+        form = ReservacionForm(request.POST)
+        if form.is_valid():
+
+            fecha_entrada = form.cleaned_data['fecha_entrada']
+            fecha_salida = form.cleaned_data['fecha_salida']
+
+            cliente = Cliente.objects.get(usuario=request.user)
+            habitacion = Habitacion.objects.get(codigo = codigo_habitacion)
+            precio_reserva = habitacion.precio_noche * (fecha_salida - fecha_entrada).days
+            print("Precio total : ", precio_reserva)
+
+            reservacion = Reservacion(
+                cliente = cliente,
+                habitacion = habitacion,
+                precio_reserva = precio_reserva,
+                fecha_entrada = fecha_entrada,
+                fecha_salida = fecha_salida
+            )
+
+            reservacion.save()
+
+            return redirect('/')
+
+
+    form = ReservacionForm()
+
+    return render(request, 'reservar.html', {'form': form, 'codigo_habitacion':codigo_habitacion})
+    
