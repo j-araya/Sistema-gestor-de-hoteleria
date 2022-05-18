@@ -1,10 +1,11 @@
+from datetime import date, datetime
+
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-import reservaciones
 
 from reservaciones.models import Cliente, Habitacion, Reservacion
 from reservaciones.forms import *
@@ -15,14 +16,16 @@ from reservaciones import utilities
 def index(request):
 
     form = PeriodoForm()
+    fecha = datetime.now().date()
 
     if request.user.is_authenticated:
         cliente = Cliente.objects.filter(usuario = request.user).first()
         if cliente is not None:
-            reservaciones = Reservacion.objects.filter(cliente=cliente)
-            return render(request, 'index.html', {'form': form, 'reservaciones':reservaciones})
+            reservaciones = Reservacion.objects.filter(cliente=cliente).order_by('-fecha_entrada', '-fecha_salida')
+
+            return render(request, 'index.html', {'form': form, 'reservaciones':reservaciones, 'fecha': fecha})
             
-    return render(request, 'index.html', {'form': form})
+    return render(request, 'index.html', {'form': form, 'fecha': fecha})
 
 def iniciar_sesion(request):
 
@@ -126,7 +129,6 @@ def reservar(request, codigo_habitacion):
             cliente = Cliente.objects.get(usuario=request.user)
             habitacion = Habitacion.objects.get(codigo = codigo_habitacion)
             precio_reserva = habitacion.precio_noche * ((fecha_salida - fecha_entrada).days + 1)
-            print("Precio total : ", precio_reserva)
 
             reservacion = Reservacion(
                 cliente = cliente,
@@ -139,9 +141,24 @@ def reservar(request, codigo_habitacion):
             reservacion.save()
 
             return redirect('/')
-            
+
     form = ReservacionForm()
     habitacion = Habitacion.objects.get(codigo=codigo_habitacion)
 
     return render(request, 'habitacion.html', {'form': form, 'habitacion':habitacion})
     
+def reservacion(request, id):
+
+    reserva = Reservacion.objects.get(id=id)
+    hoy = datetime.now().date()
+    es_futura = reserva.fecha_entrada > datetime.now().date()
+
+    return render(request, 'reservacion.html', {'es_futura':es_futura, 'reserva':reserva, 'hoy':hoy})
+
+def eliminar_reservacion(request, id):
+
+    reserva = Reservacion.objects.get(id=id)
+    reserva.delete()
+
+    return redirect('/')
+            

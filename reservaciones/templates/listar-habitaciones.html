@@ -6,24 +6,32 @@
 
 {% block content %}
 
-    {% if habitaciones %}
-        <ul>
-            {% for habitacion in habitaciones %}
-                <li>
-                    {{habitacion}}
-                    <a href="{% url 'habitacion' habitacion.codigo %}" class="btn btn-primary">Ver habitacion</a>
-
-                </li>
-                <hr>
-            {% endfor %}
-        </ul>
-        
-    {% else %}
-
-        <p>No hay habitaciones</p>
-        
-    {% endif %}
+    <div class="container-fluid py-5">
+        {% if habitaciones %}
+            <div class="row mx-5">
+                {% for habitacion in habitaciones %}
+                    <div class="col-6 p-4">
+                        <div class="card px-5 py-3"  style="background-color: #EEEEEE;">
+                            <div class="card-body">
+                                <h5 class="text-center">{{habitacion.descripcion}} {{habitacion.codigo}}</h5>
+                                <hr>
+                                <p>
+                                    <span class="font-weight-bold">Camas matrimoniales: </span> {{habitacion.camas_matrimoniales}} <br>
+                                    <span class="font-weight-bold">Camas individuales: </span> {{habitacion.camas_individuales}} <br>
+                                    <span class="font-weight-bold">Precio de noche:</span>  ${{habitacion.precio_noche}} <br>
+                                </p>
+                                <a href="{% url 'habitacion' habitacion.codigo %}" class="btn btn-primary">Ver habitacion</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+        {% else %}
     
-
+            <p>No hay habitaciones</p>
+            
+        {% endif %}
+    </div>
 
 {% endblock %}

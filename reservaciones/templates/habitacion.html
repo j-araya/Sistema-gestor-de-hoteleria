@@ -6,8 +6,9 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="container">
-        <h1>{{ habitacion.descripcion }} - {{ habitacion.codigo }}</h1>
+    <div class="m-5 p-3 card" style="background-color: #EEEEEE;">
+        <h1 class="text-center">{{ habitacion.descripcion }} - {{ habitacion.codigo }}</h1>
+        <hr>
         <p>Precio por noche: ${{ habitacion.precio_noche }}</p>
         <p>Camas matrimoniales: {{ habitacion.camas_matrimoniales }}</p>
         <p>Camas individuales: {{ habitacion.camas_individuales }}</p>

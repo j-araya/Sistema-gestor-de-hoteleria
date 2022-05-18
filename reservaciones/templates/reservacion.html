@@ -1,0 +1,26 @@
+{% extends 'Esquema.html' %}
+
+{% block title %}
+    Reservacion: {{ reserva.id }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="container">
+        <h5>{{reserva.habitacion.descripcion}} ({{reserva.habitacion.codigo}})</h5>
+        <p>
+            Entrada: {{reserva.fecha_entrada}} <br>
+            Salida: {{reserva.fecha_salida}} <br>
+            Precio de reserva: ${{reserva.precio_reserva}} <br>
+            Numero de reserva: {{reserva.id}} <br>
+            Fecha de reserva: {{reserva.fecha_registro}}
+        </p>
+        {% if es_futura %}
+            <a href="{% url 'eliminar-reservacion' reserva.id %}" class="btn btn-danger">Cancelar reserva</a>
+        {% endif %}
+    </div>
+
+    <h3>{{hoy}}</h3>
+    <h3>{{es_futura}}</h3>
+</div>
+{% endblock %}
