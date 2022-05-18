@@ -17,10 +17,11 @@ def index(request):
     form = PeriodoForm()
 
     if request.user.is_authenticated:
-        cliente = Cliente.objects.get(usuario = request.user)
-        reservaciones = Reservacion.objects.filter(cliente=cliente)
-        return render(request, 'index.html', {'form': form, 'reservaciones':reservaciones})
-        
+        cliente = Cliente.objects.filter(usuario = request.user).first()
+        if cliente is not None:
+            reservaciones = Reservacion.objects.filter(cliente=cliente)
+            return render(request, 'index.html', {'form': form, 'reservaciones':reservaciones})
+            
     return render(request, 'index.html', {'form': form})
 
 def iniciar_sesion(request):
@@ -108,9 +109,10 @@ def habitaciones(request):
     
 def habitacion(request, codigo):
 
+    form = ReservacionForm()
     habitacion = Habitacion.objects.filter(codigo=codigo).first()
 
-    return render(request, 'habitacion.html', {'habitacion': habitacion})
+    return render(request, 'habitacion.html', {'form':form, 'habitacion': habitacion})
 
 def reservar(request, codigo_habitacion):
 
@@ -123,7 +125,7 @@ def reservar(request, codigo_habitacion):
 
             cliente = Cliente.objects.get(usuario=request.user)
             habitacion = Habitacion.objects.get(codigo = codigo_habitacion)
-            precio_reserva = habitacion.precio_noche * (fecha_salida - fecha_entrada).days
+            precio_reserva = habitacion.precio_noche * ((fecha_salida - fecha_entrada).days + 1)
             print("Precio total : ", precio_reserva)
 
             reservacion = Reservacion(
@@ -137,9 +139,9 @@ def reservar(request, codigo_habitacion):
             reservacion.save()
 
             return redirect('/')
-
-
+            
     form = ReservacionForm()
+    habitacion = Habitacion.objects.get(codigo=codigo_habitacion)
 
-    return render(request, 'reservar.html', {'form': form, 'codigo_habitacion':codigo_habitacion})
+    return render(request, 'habitacion.html', {'form': form, 'habitacion':habitacion})
     

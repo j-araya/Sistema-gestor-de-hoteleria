@@ -5,14 +5,21 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container-fluid">
-        <div class="container-lg">
-            <h1>{{ habitacion.descripcion }} - {{ habitacion.codigo }}</h1>
-            <p>Precio por noche: ${{ habitacion.precio_noche }}</p>
-            <p>Camas matrimoniales: {{ habitacion.camas_matrimoniales }}</p>
-            <p>Camas individuales: {{ habitacion.camas_individuales }}</p>
+<div class="container-fluid">
+    <div class="container">
+        <h1>{{ habitacion.descripcion }} - {{ habitacion.codigo }}</h1>
+        <p>Precio por noche: ${{ habitacion.precio_noche }}</p>
+        <p>Camas matrimoniales: {{ habitacion.camas_matrimoniales }}</p>
+        <p>Camas individuales: {{ habitacion.camas_individuales }}</p>
+        <hr>
+        <form action="{% url 'reservar' habitacion.codigo %}" method="post">
 
-            <a href="{% url 'reservar' habitacion.codigo %}" class="btn btn-primary">Reservar</a>
-        </div>
+            {% csrf_token %}
+
+            {{form.as_p}}
+
+            <input type="submit" class="btn btn-primary" value="Reservar">
+        </form>
     </div>
+</div>
 {% endblock %}
