@@ -1,5 +1,6 @@
 from datetime import date, datetime
 
+from django.urls import reverse
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -161,4 +162,4 @@ def eliminar_reservacion(request, id):
     reserva.delete()
 
     return redirect('/')
-            
+

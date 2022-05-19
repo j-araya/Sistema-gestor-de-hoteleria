@@ -13,7 +13,7 @@
         <p>Camas matrimoniales: {{ habitacion.camas_matrimoniales }}</p>
         <p>Camas individuales: {{ habitacion.camas_individuales }}</p>
         <hr>
-        <form action="{% url 'reservar' habitacion.codigo %}" method="post">
+        <form action="{% url 'reservar' habitacion.codigo %}" method="get">
 
             {% csrf_token %}
 
